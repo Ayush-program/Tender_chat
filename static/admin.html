@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TenderPro Admin</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#07111C;--surface:#132233;--surface2:#1A2D40;--gold:#C9952A;--gold2:#EDB84A;--teal:#0C9EA3;--teal2:#18C5CB;--border:rgba(201,149,42,0.15);--border2:rgba(12,158,163,0.2);--text:#DDE8F2;--text2:#7A96B0;--green:#1DC87A;--red:#E05252}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;padding:36px 28px}
+.header{display:flex;align-items:center;gap:14px;margin-bottom:32px;flex-wrap:wrap}
+.header-logo{width:44px;height:44px;border-radius:12px;background:linear-gradient(135deg,var(--teal),var(--gold));display:flex;align-items:center;justify-content:center;font-size:20px}
+.header h1{font-family:'Syne',sans-serif;font-size:26px;font-weight:800}
+.header h1 span{background:linear-gradient(135deg,var(--teal2),var(--gold2));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.header a{margin-left:auto;color:var(--teal2);font-size:13px;text-decoration:none;padding:8px 16px;border:1px solid var(--border2);border-radius:8px}
+.header a:hover{background:rgba(12,158,163,0.08)}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:14px;margin-bottom:28px}
+.stat{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:18px 20px}
+.stat-val{font-family:'Syne',sans-serif;font-size:30px;font-weight:800;line-height:1}
+.stat-val.teal{color:var(--teal2)} .stat-val.gold{color:var(--gold2)} .stat-val.green{color:var(--green)}
+.stat-label{font-size:12.5px;color:var(--text2);margin-top:5px}
+.table-wrap{background:var(--surface);border:1px solid var(--border);border-radius:16px;overflow:hidden}
+.table-head{padding:16px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
+.table-head h2{font-family:'Syne',sans-serif;font-size:15px;font-weight:700}
+.refresh-btn{background:linear-gradient(135deg,var(--teal),var(--gold));border:none;color:white;padding:8px 16px;border-radius:8px;font-family:'Syne',sans-serif;font-size:12.5px;font-weight:600;cursor:pointer}
+table{width:100%;border-collapse:collapse}
+th{text-align:left;padding:12px 18px;font-size:11px;font-weight:600;color:var(--text2);letter-spacing:0.6px;text-transform:uppercase;border-bottom:1px solid var(--border);background:rgba(26,45,64,0.5)}
+td{padding:13px 18px;font-size:13.5px;border-bottom:1px solid rgba(201,149,42,0.06)}
+tr:last-child td{border-bottom:none}
+tr:hover td{background:rgba(12,158,163,0.04)}
+.badge{background:rgba(12,158,163,0.1);border:1px solid var(--border2);color:var(--teal2);padding:3px 10px;border-radius:20px;font-size:11.5px;font-weight:500}
+.empty{text-align:center;padding:50px;color:var(--text2);font-size:14px}
+.loading{text-align:center;padding:40px;color:var(--text2)}
+.spinner{display:inline-block;width:24px;height:24px;border:2px solid var(--border);border-top-color:var(--teal);border-radius:50%;animation:spin 0.8s linear infinite;margin-bottom:12px}
+@keyframes spin{to{transform:rotate(360deg)}}
+</style>
+</head>
+<body>
+<div class="header">
+  <div class="header-logo">🏛️</div>
+  <h1>TenderPro <span>Admin</span></h1>
+  <a href="/">← View Chatbot</a>
+</div>
+
+<div class="stats">
+  <div class="stat"><div class="stat-val teal" id="s-total">—</div><div class="stat-label">Total Leads</div></div>
+  <div class="stat"><div class="stat-val gold" id="s-today">—</div><div class="stat-label">Today's Leads</div></div>
+  <div class="stat"><div class="stat-val green" id="s-msgs">—</div><div class="stat-label">Total Messages</div></div>
+</div>
+
+<div class="table-wrap">
+  <div class="table-head">
+    <h2>All Leads</h2>
+    <button class="refresh-btn" onclick="load()">↻ Refresh</button>
+  </div>
+  <div id="table-content">
+    <div class="loading"><div class="spinner"></div><br>Loading leads…</div>
+  </div>
+</div>
+
+<script>
+async function load() {
+  try {
+    const [leadsRes, statsRes] = await Promise.all([
+      fetch('/api/admin/leads'),
+      fetch('/api/admin/stats')
+    ]);
+    const leads = await leadsRes.json();
+    const stats = await statsRes.json();
+
+    document.getElementById('s-total').textContent = stats.total_leads ?? '—';
+    document.getElementById('s-today').textContent = stats.today_leads ?? '—';
+    document.getElementById('s-msgs').textContent  = stats.total_messages ?? '—';
+
+    if (!leads.length) {
+      document.getElementById('table-content').innerHTML =
+        '<div class="empty">No leads yet. Share the chatbot link to start collecting!</div>';
+      return;
+    }
+
+    document.getElementById('table-content').innerHTML = `
+      <table>
+        <thead><tr><th>#</th><th>Name</th><th>Email</th><th>Mobile</th><th>Date & Time</th><th>Status</th></tr></thead>
+        <tbody>
+          ${leads.map((l,i) => `
+            <tr>
+              <td style="color:var(--text2)">${leads.length-i}</td>
+              <td><strong>${esc(l.name)}</strong></td>
+              <td>${esc(l.email)}</td>
+              <td>${esc(l.mobile)}</td>
+              <td style="color:var(--text2);font-size:12.5px">${new Date(l.created_at).toLocaleString('en-IN')}</td>
+              <td><span class="badge">New</span></td>
+            </tr>`).join('')}
+        </tbody>
+      </table>`;
+  } catch(e) {
+    document.getElementById('table-content').innerHTML =
+      '<div class="empty">Error loading data. Is the server running?</div>';
+  }
+}
+function esc(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+load();
+</script>
+</body>
+</html>
