@@ -1,188 +1,220 @@
-# 🏛️ TenderPro AI Chatbot — Python (FastAPI + LangChain + Groq)
+﻿# TenderPro AI Chatbot
+
+TenderPro AI Chatbot is a FastAPI-based lead capture and AI assistant app for tender consultancy businesses. It uses Groq and LangChain for AI responses, SQLite for local data storage, and includes a public chatbot page plus an admin dashboard.
+
+## Features
+
+- AI chatbot for tender consultancy queries
+- Lead capture with name, email, and Indian mobile validation
+- SQLite database for leads and chat logs
+- Admin dashboard for leads and basic statistics
+- FastAPI backend with Swagger API docs
+- Static HTML, CSS, and JavaScript frontend
+- Groq model configuration through environment variables
+
+## Tech Stack
+
+- Python
+- FastAPI
+- Uvicorn
+- LangChain
+- Groq
+- SQLite
+- aiosqlite
+- Pydantic
+- HTML, CSS, JavaScript
 
 ## Project Structure
-```
+
+```text
 tenderpro-python/
-├── main.py                    ← FastAPI app entry point
-├── requirements.txt           ← Python dependencies
-├── .env.example               ← Environment variables template
+├── main.py                  # FastAPI app entry point
+├── requirements.txt         # Python dependencies
+├── .env.example             # Environment variable example
+├── .gitignore               # Git ignored files
 ├── data/
-│   └── tenderpro.db           ← SQLite database (auto-created)
+│   └── tenderpro.db         # SQLite database, created on first run
 ├── static/
-│   ├── index.html             ← Chatbot frontend
-│   └── admin.html             ← Admin leads panel
+│   ├── index.html           # Chatbot frontend
+│   └── admin.html           # Admin leads dashboard
 └── app/
-    ├── __init__.py
-    ├── database.py            ← Async SQLite setup
-    ├── schemas.py             ← Pydantic validation models
-    ├── ai_service.py          ← LangChain + Groq AI logic
+    ├── database.py          # SQLite setup and database dependency
+    ├── schemas.py           # Pydantic request/response models
+    ├── ai_service.py        # Groq and LangChain AI logic
     └── routers/
-        ├── __init__.py
-        ├── leads.py           ← POST /api/lead
-        ├── chat.py            ← POST /api/chat
-        └── admin.py           ← GET /api/admin/leads & /stats
+        ├── leads.py         # POST /api/lead
+        ├── chat.py          # POST /api/chat
+        └── admin.py         # Admin API routes
 ```
 
----
+## Requirements
 
-## ✅ Step 1 — Install Python
+- Python 3.10 or higher
+- Groq API key
 
-Download from: https://python.org (version 3.10 or higher)
+Check Python and pip:
 
-Verify installation:
 ```bash
-python --version   # should show 3.10+
+python --version
 pip --version
 ```
 
----
+## Setup
 
-## ✅ Step 2 — Get FREE Groq API Key
+1. Clone or open the project folder:
 
-1. Visit: https://console.groq.com
-2. Sign up / Login
-3. Click **API Keys** → **Create API Key**
-4. Copy the key (starts with `gsk_...`)
-
----
-
-## ✅ Step 3 — Setup Project
-
-### Option A: Using venv (Recommended)
 ```bash
 cd tenderpro-python
+```
 
-# Create virtual environment
+2. Create a virtual environment:
+
+```bash
 python -m venv venv
+```
 
-# Activate it
-# On Windows:
-venv\Scripts\activate
-# On Mac/Linux:
+3. Activate the virtual environment.
+
+Windows PowerShell:
+
+```powershell
+venv\Scripts\Activate.ps1
+```
+
+Windows Command Prompt:
+
+```bat
+venv\Scripts\activate.bat
+```
+
+macOS/Linux:
+
+```bash
 source venv/bin/activate
-
-# Install dependencies
-pip install -r requirements.txt
 ```
 
-### Option B: Direct install
+4. Install dependencies:
+
 ```bash
 pip install -r requirements.txt
 ```
 
----
+5. Create your environment file:
 
-## ✅ Step 4 — Configure API Key
+Windows PowerShell:
+
+```powershell
+Copy-Item .env.example .env
+```
+
+macOS/Linux:
 
 ```bash
-# Copy the example env file
 cp .env.example .env
 ```
 
-Open `.env` file and add your Groq key:
-```
+6. Add your Groq API key in `.env`:
+
+```env
 GROQ_API_KEY=gsk_your_actual_key_here
+GROQ_MODEL=llama-3.1-8b-instant
 ```
 
----
+You can create a Groq API key from https://console.groq.com.
 
-## ✅ Step 5 — Run the Server
+## Run The Project
+
+Start the server:
 
 ```bash
 python main.py
 ```
 
-You should see:
-```
-╔══════════════════════════════════════════╗
-║   🏛️  TenderPro AI Chatbot Running!      ║
-╠══════════════════════════════════════════╣
-║  Chatbot : http://localhost:8000          ║
-║  Admin   : http://localhost:8000/admin    ║
-║  API Docs: http://localhost:8000/docs     ║
-╚══════════════════════════════════════════╝
-```
-
----
-
-## ✅ Step 6 — Open in Browser
+The app will run at:
 
 | URL | Purpose |
-|-----|---------|
-| http://localhost:8000 | Chatbot (share with clients) |
-| http://localhost:8000/admin | Admin panel (your leads) |
-| http://localhost:8000/docs | Auto-generated Swagger API docs |
+| --- | --- |
+| http://localhost:8000 | Chatbot page |
+| http://localhost:8000/admin | Admin dashboard |
+| http://localhost:8000/docs | FastAPI Swagger docs |
 
----
+## Development Mode
 
-## 🔄 Development Mode (auto-reload on code changes)
+For auto-reload while editing code:
 
 ```bash
 uvicorn main:app --reload --port 8000
 ```
 
----
+If port 8000 is already in use:
 
-## 📝 Customize Company Info
-
-Open `app/ai_service.py` and edit the `SYSTEM_PROMPT` variable:
-- Change company name, phone, email
-- Add/remove services
-- Update pricing info, etc.
-
----
-
-## 🌐 Deploy to Production
-
-### Railway.app (Free)
-1. Push code to GitHub
-2. Go to railway.app → New Project → GitHub repo
-3. Add env variable: `GROQ_API_KEY=your_key`
-4. Start command: `uvicorn main:app --host 0.0.0.0 --port $PORT`
-
-### Render.com (Free)
-1. Create Web Service from GitHub
-2. Build: `pip install -r requirements.txt`
-3. Start: `uvicorn main:app --host 0.0.0.0 --port $PORT`
-4. Add `GROQ_API_KEY` in Environment
-
-### VPS / Dedicated Server
 ```bash
-pip install gunicorn
-gunicorn main:app -w 4 -k uvicorn.workers.UvicornWorker --bind 0.0.0.0:8000
+uvicorn main:app --reload --port 8001
 ```
 
----
-
-## 🔌 API Endpoints
+## API Endpoints
 
 | Method | Endpoint | Description |
-|--------|----------|-------------|
+| --- | --- | --- |
 | GET | `/` | Chatbot page |
-| GET | `/admin` | Admin panel |
-| POST | `/api/lead` | Save lead (name, email, mobile) |
-| POST | `/api/chat` | Chat with AI |
-| GET | `/api/admin/leads` | All leads |
-| GET | `/api/admin/stats` | Dashboard stats |
-| GET | `/docs` | Swagger UI |
+| GET | `/admin` | Admin dashboard |
+| POST | `/api/lead` | Save a lead |
+| POST | `/api/chat` | Send chat messages to AI |
+| GET | `/api/admin/leads` | Get all leads |
+| GET | `/api/admin/stats` | Get dashboard stats |
+| GET | `/docs` | Swagger API docs |
 
----
+## Customize Company Information
 
-## 🆘 Troubleshooting
+Edit `SYSTEM_PROMPT` in `app/ai_service.py` to update:
+
+- Company name
+- Services
+- Contact details
+- Pricing message
+- Business location
+- Assistant behavior
+
+## Database
+
+The SQLite database is created automatically at `data/tenderpro.db` when the server starts. It stores:
+
+- Lead details
+- User chat messages
+- Assistant replies
+
+## Deployment
+
+Example production command:
+
+```bash
+uvicorn main:app --host 0.0.0.0 --port $PORT
+```
+
+For Render, Railway, or a VPS, set this environment variable:
+
+```env
+GROQ_API_KEY=your_groq_api_key
+```
+
+Optional model override:
+
+```env
+GROQ_MODEL=llama-3.1-8b-instant
+```
+
+## Troubleshooting
 
 | Problem | Solution |
-|---------|----------|
-| `GROQ_API_KEY` error | Make sure `.env` file exists with valid key |
-| `ModuleNotFoundError` | Run `pip install -r requirements.txt` again |
-| Port 8000 in use | Run `uvicorn main:app --port 8001` |
-| DB not found | It's auto-created in `data/` folder on first run |
+| --- | --- |
+| `GROQ_API_KEY not found` | Create `.env` and add your Groq API key |
+| `ModuleNotFoundError` | Run `pip install -r requirements.txt` |
+| Port already in use | Run with another port, for example `--port 8001` |
+| Database missing | Start the server; it is created automatically |
+| AI model error | Set `GROQ_MODEL` to a supported Groq model |
 
----
+## Notes
 
-## Tech Stack
-- **FastAPI** — Modern async Python web framework
-- **LangChain** — AI orchestration + conversation memory
-- **Groq** — Ultra-fast LLM inference (Llama 3)
-- **aiosqlite** — Async SQLite database
-- **Pydantic** — Data validation & schemas
-- **Uvicorn** — ASGI server
+- Do not commit `.env` because it contains secrets.
+- The admin page is currently public. Add authentication before using it in production.
+- The local SQLite database is useful for development and small deployments.
